@@ -75,3 +75,5 @@ release.properties
 
 ### OSX ###
 .DS_Store
+
+audit.log

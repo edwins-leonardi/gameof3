@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>GameOf3!</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+	integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+	crossorigin="anonymous">
+</head>
+<body>
+	<div class="jumbotron">
+		<h1 class="display-4">Hi there!</h1>
+		<p class="lead">Welcome aboard. This is a game of 3 sum.</p>
+		<hr class="my-4">
+		<p>Click the button below to start a new game or join an existing
+			game</p>
+		<p class="lead">
+			<a id="btnPlay" class="btn btn-primary btn-lg"
+				href="javascript:connectBtnHandler();" role="button">Play</a>
+		</p>
+	</div>
+
+	<div class="progress" style="display: none" id="progressBar">
+		<div class="progress-bar progress-bar-striped progress-bar-animated"
+			role="progressbar" aria-valuenow="1" aria-valuemin="0"
+			aria-valuemax="50" style="width: 1%"></div>
+	</div>
+
+	<div class="alert alert-danger" role="alert" style="display: none">
+		Ouch. Seems that the game server is unavailable right now. Try again
+		later.
+		<button type="button" class="close" data-dismiss="alert"
+			aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+
+	<div id="output" class="card" style="width: 18rem; display: none">
+		<div class="card-header">Game output</div>
+		<ul class="list-group list-group-flush" id="list">
+		</ul>
+	</div>
+
+	<a id="btnPlayAgain" class="btn btn-dark btn-lg"
+		style="display: none; margin: 5px"
+		href="javascript:playAgainBtnHandler();" role="button">Play Again?</a>
+
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+		integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+		integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+		crossorigin="anonymous"></script>
+	<script type="text/javascript">
+		var gameStep = {};
+		var lastStatus = '';
+		var timer;
+		var step = 1;
+		function connectBtnHandler() {
+			$.ajax({
+				type : "GET",
+				url : "/rest/player/play",
+				success : function(data) {
+					gameStep = data;
+					console.log(gameStep);
+					$('#btnPlay').addClass('disabled');
+					$('#output').toggle();
+					$('#progressBar').toggle();
+					addMessageOutput('You are ' + gameStep.player.name);
+					timer = setTimeout(checkNextStep, 2000);
+				},
+				error : function(xhr, ajaxOptions, error) {
+					console.log('error', error);
+					$('.alert').toggle();
+				},
+				contentType : 'application/json'
+			});
+		}
+		function addMessageOutput(message) {
+			$('#list').append(
+					'<li class="list-group-item">' + message + '</li>');
+		}
+
+		function checkNextStep() {
+			$.ajax({
+				type : "POST",
+				url : "/rest/player/check",
+				data : JSON.stringify(gameStep),
+				success : function(data) {
+					if (lastStatus !== data.status)
+						addMessageOutput(data.status);
+					update(data);
+					if (!data.finished) {
+						timer = setTimeout(checkNextStep, 2000);
+					} else {
+						$('#btnPlayAgain').toggle();
+					}
+				},
+				error : function(xhr, ajaxOptions, thrownError) {
+					alert(" write json item, Ajax error! " + xhr.status
+							+ " error =" + thrownError + " xhr.responseText = "
+							+ xhr.responseText);
+				},
+				contentType : 'application/json'
+			});
+		}
+
+		function update(data) {
+			lastStatus = data.status;
+			gameStep.currentStep = data.currentStep;
+			step++;
+			$('.progress-bar').css('width', step + '%').attr('aria-valuenow',
+					step);
+		}
+
+		function reset(data) {
+			lastStatus = '';
+			gameStep.currentStep = data.currentStep;
+			step = 1;
+			$('.progress-bar').css('width', step + '%').attr('aria-valuenow',
+					step);
+			$('#btnPlayAgain').toggle();
+		}
+
+		function playAgainBtnHandler() {
+			$("#list").empty();
+			$.ajax({
+				type : "POST",
+				url : "/rest/player/play-again",
+				data : JSON.stringify(gameStep.player),
+				success : function(data) {
+					addMessageOutput('You are ' + gameStep.player.name);
+					reset(data);
+					timer = setTimeout(checkNextStep, 2000);
+					update(data);
+					if (!data.finished) {
+						timer = setTimeout(checkNextStep, 2000);
+					} else {
+						$('#btnPlayAgain').toggle();
+					}
+				},
+				error : function(xhr, ajaxOptions, thrownError) {
+					alert(" write json item, Ajax error! " + xhr.status
+							+ " error =" + thrownError + " xhr.responseText = "
+							+ xhr.responseText);
+				},
+				contentType : 'application/json'
+			});
+		}
+	</script>
+</body>
+</html>
