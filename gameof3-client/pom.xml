@@ -80,7 +80,9 @@
 				<version>${version.wildfly.swarm}</version>
 				<executions>
 					<execution>
-						<id>package</id>
+						<goals>
+							<goal>package</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
