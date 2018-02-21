@@ -1,26 +1,21 @@
 package com.takeaway.gameof3.api.service;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import com.takeaway.gameof3.api.entity.Player;
+import com.takeaway.gameof3.api.repository.PlayerRepository;
 
 @ApplicationScoped
 public class PlayerService {
-	
 	private static final String PLAYER_NAME_TEMPLATE = "player_";
-	private Set<Player> players;
 	
-	public PlayerService(){
-		players = new HashSet<Player>();
-	}
+	@Inject
+	private PlayerRepository repository;
 	
 	public Player createNewPlayer(){
-		int index = players.size();
-		Player player = new Player(PLAYER_NAME_TEMPLATE + (index+1));
-		players.add(player);
+		Player player = new Player(PLAYER_NAME_TEMPLATE + (repository.getNextIndex()));
+		repository.store(player);
 		return player;
 	}
 }
