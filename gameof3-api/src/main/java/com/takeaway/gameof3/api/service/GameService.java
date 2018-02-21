@@ -1,52 +1,38 @@
-package com.takeaway.gameof3.client.service;
+package com.takeaway.gameof3.api.service;
 
 import java.util.HashMap;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import com.takeaway.gameof3.client.entity.Game;
-import com.takeaway.gameof3.client.entity.GameStep;
-import com.takeaway.gameof3.client.entity.Player;
-import com.takeaway.gameof3.client.entity.Result;
+import com.takeaway.gameof3.api.entity.Game;
+import com.takeaway.gameof3.api.entity.GameStep;
+import com.takeaway.gameof3.api.entity.Player;
+import com.takeaway.gameof3.api.entity.Result;
 
 @ApplicationScoped
 public class GameService {
-	
-	private Game gameToStart;
+	private Game gameWithOnePlayer;
 	private HashMap<String, Game> games = new HashMap<String, Game>();
 	private static final String OUTPUT_FORMAT = "%s has added %s and returned %s"; 
 	
 	
-	public GameStep playAgain(Player player) {
-		if(gameToStart == null) 
-			gameToStart = new Game(player.getName());
-		else
-			gameToStart.setPlayer2(player.getName());
-		games.put(player.getName(), gameToStart);
+	public GameStep joinGame(Player player) {
+		if(gameWithOnePlayer == null)
+			joinGameAsPrimaryPlayer(player);
+		else 
+			joinGameAsSecondPlayer(player);
+
 		return new GameStep(player);
 	}
 	
-	public Result checkGameStatus(Player player, Integer playerCurrentStep){
+	public Result getGameStatus(Player player, Integer playerCurrentStep){
 		if(games.containsKey(player.getName())) {
 			Game game = games.get(player.getName());
 			if(!playerCurrentStep.equals(game.getLastStep())){
 				return new Result(game);
 			}
 			nextMove(game, player.getName());
-		} else {
-			if(gameToStart == null)
-				gameToStart = new Game(player.getName());
-			else{ 
-				Game gameCopy = gameToStart;
-				gameToStart.setPlayer2(player.getName());
-				games.put(player.getName(), gameToStart);
-				gameToStart = null;
-				return new Result(gameCopy);
-			}
-
-			games.put(player.getName(), gameToStart);
-				
-		}
+		} 
 		return new Result(games.get(player.getName()));
 	}
 	
@@ -76,5 +62,17 @@ public class GameService {
 			return 1;
 		else
 			return -1;
+	}
+
+	private void joinGameAsPrimaryPlayer(Player player1){
+		gameWithOnePlayer = new Game(player1.getName());
+		games.put(player1.getName(), gameWithOnePlayer);
+	}
+
+	private void joinGameAsSecondPlayer(Player player2){
+		Game game = gameWithOnePlayer;
+		game.setPlayer2(player2.getName());
+		games.put(player2.getName(), game);
+		gameWithOnePlayer = null;
 	}
 }

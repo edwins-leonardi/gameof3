@@ -11,7 +11,6 @@ import com.takeaway.gameof3.client.entity.GameStep;
 import com.takeaway.gameof3.client.entity.Player;
 import com.takeaway.gameof3.client.entity.Result;
 import com.takeaway.gameof3.client.game.client.GameApiClient;
-import com.takeaway.gameof3.client.service.GameService;
 
 @Path("/player")
 @Produces("application/json")
@@ -19,27 +18,24 @@ import com.takeaway.gameof3.client.service.GameService;
 public class PlayerResource {
 	
 	@Inject
-	private GameService gameService;
-	@Inject
 	private GameApiClient gameApiClient;
 	
 	@GET
 	@Path("/play")
 	public GameStep joinGame(){
-		Player player = gameApiClient.joinGame(); 
-		return new GameStep(player);
+		Player player = gameApiClient.createPlayer(); 
+		return gameApiClient.joinNewGame(player);
 	}
 	
 	@POST
 	@Path("/check")
 	public Result checkGame(GameStep gameStep){
-		return gameService.checkGameStatus(gameStep.getPlayer(), gameStep.getCurrentStep());
+		return gameApiClient.getGameStatus(gameStep);
 	}
 
 	@POST
 	@Path("/play-again")
 	public GameStep playAgain(Player player){
-		return gameService.playAgain(player);
+		return gameApiClient.joinNewGame(player);
 	}
-
 }

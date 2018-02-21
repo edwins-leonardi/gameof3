@@ -1,4 +1,4 @@
-package com.takeaway.gameof3.client.entity;
+package com.takeaway.gameof3.api.entity;
 
 public class Result {
 	private String status;
@@ -6,6 +6,14 @@ public class Result {
 	private Boolean finished;
 	
 	public Result(){
+		
+	}
+
+	public Result(Game game) {
+		super();
+		this.status = game.getStatus();
+		this.currentStep = game.getLastStep();
+		this.finished = game.isFinished();
 	}
 
 	public String getStatus() {

@@ -1,4 +1,4 @@
-package com.takeaway.gameof3.client.entity;
+package com.takeaway.gameof3.api.entity;
 
 import java.util.Random;
 
@@ -13,7 +13,7 @@ public class Game {
 	
 	public Game(String player1){
 		this.player1 = player1;
-		this.currentNumber = new Random().nextInt(100) + 50;
+		this.currentNumber = new Random().nextInt(151) + 50;
 		this.status = player1 + " started a new game. Waiting for one opponent now!";
 		this.lastPlayer = player1;
 		this.lastStep = 1;
