@@ -96,11 +96,9 @@
 					if (lastStatus !== data.status)
 						addMessageOutput(data.status);
 					update(data);
-					console.log('finished? ', data.finished);
 					if (!data.finished) {
 						timer = setTimeout(checkNextStep, 2000);
 					} else {
-						console.log('play again?');
 						$('#btnPlayAgain').toggle();
 					}
 				},
@@ -139,7 +137,6 @@
 				success : function(data) {
 					addMessageOutput('You are ' + gameStep.player.name);
 					reset(data);
-					timer = setTimeout(checkNextStep, 2000);
 					update(data);
 					if (!data.finished) {
 						timer = setTimeout(checkNextStep, 2000);
